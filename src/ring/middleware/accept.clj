@@ -33,6 +33,11 @@
 (defn- parse-header [header]
   (map second (re-seq re-accept-header header)))
 
+(defn accept-request [request]
+  (if-let [header (get-in request [:headers "accept"])]
+    (let [values (parse-header header)
+          accept (into {} (map parse-accept values))]
+      (assoc request :accept accept))))
+
 (defn wrap-accept [handler]
-  (fn [request]
-    (handler request)))
+  (comp handler accept-request))
